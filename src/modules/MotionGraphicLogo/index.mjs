@@ -16,7 +16,7 @@ class MotionLogo {
     canvas.style.backgroundColor = conf.canvasBgColor || '#FFF';
   }
 
-  grid() {
+  strokeGrid() {
     const canvas = this.canvas;
     const ctx = this.ctx;
     //const el = document.getElementById(this.canvas.id);
@@ -25,12 +25,15 @@ class MotionLogo {
 
     ctx.beginPath();
     ctx.strokeStyle = 'gold';
-    ctx.moveTo((canvas.width / 4), canvas.height);  
-    ctx.lineTo((canvas.width / 4), 0);
-    ctx.moveTo((canvas.width / 2), canvas.height);  
-    ctx.lineTo((canvas.width / 2), 0);
+    ctx.moveTo((canvas.width * 0.25), canvas.height);  
+    ctx.lineTo((canvas.width * 0.25), 0);
+    ctx.moveTo((canvas.width * 0.75), canvas.height);  
+    ctx.lineTo((canvas.width * 0.75), 0);
+    ctx.moveTo(0, (canvas.height * 0.5));  
+    ctx.lineTo(canvas.width, (canvas.height * 0.5));
     ctx.stroke();
 
+    //console.log(canvas.width * 0.75);
   }
 }
 
