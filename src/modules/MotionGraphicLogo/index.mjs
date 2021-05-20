@@ -1,27 +1,34 @@
-class MotionLogo {
-
-  constructor(canvas, conf) {
-    this.canvas = document.getElementById(canvas);
+class MotionLogo { constructor(canvas, conf) { this.canvas = document.getElementById(canvas);
     this.ctx = this.canvas.getContext('2d');
     this.init(conf);
   }
 
   init(conf) {
-    const canvas = this.canvas;
     /* レティナ対応処理!?
     * const ratio = window.devicePixelRatio;  
     **/
-    canvas.width = conf.canvasWidth || canvas.parentNode.clientWidth;
-    canvas.height = conf.canvasHeight || canvas.parentNode.clientHeight;
+    const canvas = this.canvas;
+    const viewBox = () => {
+      this.width = conf.canvasWidth || '100%';
+      this.height = conf.canvasHeight || '100%';
+
+      canvas.style.width = this.width;
+      canvas.style.height = this.height;
+      
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      //console.log('viewBox Width', this.width);
+      //console.log('viewBox Height', this.height);
+    }
+
+    viewBox();
     canvas.style.backgroundColor = conf.canvasBgColor || '#FFF';
   }
 
   strokeGrid() {
     const canvas = this.canvas;
     const ctx = this.ctx;
-    //const el = document.getElementById(this.canvas.id);
-    //const w = canvas.width;
-
 
     ctx.beginPath();
     ctx.strokeStyle = 'gold';
@@ -35,6 +42,8 @@ class MotionLogo {
 
     //console.log(canvas.width * 0.75);
   }
+
+  
 }
 
 export default MotionLogo;
