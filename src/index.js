@@ -5,7 +5,7 @@ const logo = new mgLogo('js__motiongraphic-logo',
   {
     canvasWidth: '100%',
     canvasHeight: '90vh',
-    //canvasBgColor: '#696969'  
+    canvasBgColor: '#696969'  
   }
 );
 

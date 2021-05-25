@@ -24,7 +24,20 @@ class MotionLogo {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     ctx.fillStyle = conf.canvasBgColor || '#FFF';
-    ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    //ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+    window.requestAnimFrame = (function(){
+      return (
+        window.requestAnimationFrame   ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame    ||
+        window.oRequestAnimationFrame      ||
+        window.msRequestAnimationFrame     ||
+        function(callback){
+          window.setTimeout(callback, 1000 / 60);
+        }
+      );
+   })();
   }
 
   getPosition() {
@@ -112,24 +125,27 @@ class MotionLogo {
 
     }
     const r = 8;
+    const speed = 2;
     let x = position.cx - position.offset;
     let y = 0;
 
-    //console.log('x', x);
-    //console.log('y', y);
-    //console.log('r', r);
-
-    //ctx.strokeStyle = '#333'; // 塗りつぶしは暗めの色
-    ctx.fillStyle = fillStyle; // 線は赤色
-    ctx.lineWidth = lineWidth; // 線の幅は5px
+    //ctx.fillStyle = fillStyle;
+    ctx.lineWidth = lineWidth;
 
     (function loop() {
-      window.requestAnimationFrame(loop);
+      window.requestAnimFrame(loop);
 
-      y += 2;
-      /* 円の描画 */
+      ctx.globalAlpha = 0.1;
+      ctx.fill(); 
+      ctx.globalAlpha = 1;
+
+      y += speed;
+
+      if(y > canvas.height) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
       ctx.beginPath(); // パスの初期化
-      //ctx.arc(100, 50, 30, 0, 2 * Math.PI); // (100, 50)の位置に半径30pxの円
       ctx.arc(x, y, r, 0, Math.PI * 2, true); // (100, 50)の位置に半径30pxの円
       ctx.closePath(); // パスを閉じる
       ctx.fill(); // 軌跡の範囲を塗りつぶす
