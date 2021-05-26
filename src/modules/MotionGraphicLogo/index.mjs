@@ -1,43 +1,48 @@
 class MotionLogo {
 
-  constructor(canvas, conf) {
-    this._canvas = document.getElementById(canvas);
+  constructor(elementId, conf) {
+    this._canvas = document.getElementById(elementId);
     this._ctx = this._canvas.getContext('2d');
+    //this.ratio = window.devicePixelRatio;  // レティナディスプレイ等対応 
     this.init(conf);
   }
 
   init(conf) {
     /*
-    ** conf 
+    ** Window[load || resize] イベントで呼ばれることを期待する初期化メソッド
+    **
+    ** Configration Parameters 
     ** - canvasWidth
     ** - canvasHeight
-    ** - canvasBgColor(Back Ground Color)
-    ** - canvasBlColor(Back Line Color)
+    ** - ctxBgColor(Back Ground Color)
+    ** - ctxBlColor(Back Line Color)
     **/
-    const ratio = window.devicePixelRatio;  // レティナディスプレイ等対応 
+
     const canvas = this._canvas;
     const ctx = this._ctx;
+
     //const viewBox = {}
     
     canvas.style.width = conf.canvasWidth || '100%';
     canvas.style.height = conf.canvasHeight || '100%';
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-    ctx.fillStyle = conf.canvasBgColor || '#FFF';
-    //ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    ctx.fillStyle = conf.ctxBgColor || '#FFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 
-    window.requestAnimFrame = (function(){
-      return (
-        window.requestAnimationFrame   ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame    ||
-        window.oRequestAnimationFrame      ||
-        window.msRequestAnimationFrame     ||
-        function(callback){
-          window.setTimeout(callback, 1000 / 60);
-        }
-      );
-   })();
+  reqAnimFrame(cb) {
+    console.log('reqAnimFrame');
+    return (
+      window.requestAnimationFrame   ||
+      window.webkitRequestAnimationFrame ||
+      window.mozRequestAnimationFrame    ||
+      window.oRequestAnimationFrame      ||
+      window.msRequestAnimationFrame     ||
+      function(cb){
+        window.setTimeout(cb, 1000 / 60);
+      }
+    );
   }
 
   getPosition() {
@@ -84,8 +89,8 @@ class MotionLogo {
     const canvas = this._canvas;
     const ctx = this._ctx;
     const position = {
-      cx: this.getPosition().center('x'),
-      cy: this.getPosition().center('y'),
+      cx: this.getPosition().center('x'), // xCenter
+      cy: this.getPosition().center('y'), // yCenter
       offset: this.getPosition().verticalInterval(),
       offsetInclinedY: this.getPosition().inclined()
 
@@ -114,44 +119,56 @@ class MotionLogo {
 
   }
 
+  drawCircle(ctx, x, y, r, c) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2, true);
+    ctx.closePath();
+    // Check !!!!
+    ctx.fillStyle = 'gold';
+    ctx.fill();
+    
+  }
   motionLine(fillStyle, lineWidth) {
-    const canvas = this._canvas;
-    const ctx = this._ctx;
+    const canvas = this._canvas, ctx = this._ctx;
     const position = {
       cx: this.getPosition().center('x'),
       cy: this.getPosition().center('y'),
       offset: this.getPosition().verticalInterval(),
       offsetInclinedY: this.getPosition().inclined()
+    }
+    const radius = 8, speed = 2;
+    let x = (position.cx - position.offset);
+    let y = 0; 
+
+    console.log('Y', y);
+    console.log('canvasHeight', canvas.height);
+
+    const loop = () => {
+        console.log('loop');
+
+
+
+      //if(y <= canvas.height) {
+        this.reqAnimFrame(loop);
+        ctx.globalAlpha = 0.1;
+        ctx.fillStyle = ctx.fillStyle;  
+        //console.log('ContextFillStyle', ctx.fillStyle);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1;
+        //ctx.lineWidth = lineWidth;
+
+        y += speed;
+
+
+        //ctx.globalAlpha = 0.1;
+      this.drawCircle(ctx, x, y, radius);
+      //};
+
 
     }
-    const r = 8;
-    const speed = 2;
-    let x = position.cx - position.offset;
-    let y = 0;
 
-    //ctx.fillStyle = fillStyle;
-    ctx.lineWidth = lineWidth;
+  loop();
 
-    (function loop() {
-      window.requestAnimFrame(loop);
-
-      ctx.globalAlpha = 0.1;
-      ctx.fill(); 
-      ctx.globalAlpha = 1;
-
-      y += speed;
-
-      if(y > canvas.height) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-
-      ctx.beginPath(); // パスの初期化
-      ctx.arc(x, y, r, 0, Math.PI * 2, true); // (100, 50)の位置に半径30pxの円
-      ctx.closePath(); // パスを閉じる
-      ctx.fill(); // 軌跡の範囲を塗りつぶす
-
-
-    })();
   }
 
   
