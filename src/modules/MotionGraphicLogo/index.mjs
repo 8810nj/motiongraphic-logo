@@ -5,6 +5,7 @@ class MotionLogo {
     this._ctx = this._canvas.getContext('2d');
     //this.ratio = window.devicePixelRatio;  // レティナディスプレイ等対応 
     this.init(conf);
+    this.initRequestAnimationFrame();
   }
 
   init(conf) {
@@ -31,18 +32,18 @@ class MotionLogo {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  reqAnimFrame(cb) {
-    console.log('reqAnimFrame');
-    return (
-      window.requestAnimationFrame   ||
-      window.webkitRequestAnimationFrame ||
-      window.mozRequestAnimationFrame    ||
-      window.oRequestAnimationFrame      ||
-      window.msRequestAnimationFrame     ||
-      function(cb){
-        window.setTimeout(cb, 1000 / 60);
-      }
-    );
+  initRequestAnimationFrame() {
+    window.reqAnimationFrame = (function() {
+      return 
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(cb){
+          window.setTimeout(cb, 1000 / 60);
+        };
+    })();
   }
 
   getPosition() {
@@ -123,52 +124,41 @@ class MotionLogo {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2, true);
     ctx.closePath();
-    // Check !!!!
-    ctx.fillStyle = 'gold';
+    ctx.fillStyle = c;
     ctx.fill();
     
   }
+
   motionLine(fillStyle, lineWidth) {
     const canvas = this._canvas, ctx = this._ctx;
+    const self = this;
     const position = {
       cx: this.getPosition().center('x'),
       cy: this.getPosition().center('y'),
       offset: this.getPosition().verticalInterval(),
       offsetInclinedY: this.getPosition().inclined()
     }
-    const radius = 8, speed = 2;
-    let x = (position.cx - position.offset);
-    let y = 0; 
+    let x = (position.cx - position.offset), y = 0; 
+    const radius = 4, speed = 8; 
 
-    console.log('Y', y);
-    console.log('canvasHeight', canvas.height);
+    (function loop() {
 
-    const loop = () => {
-        console.log('loop');
+      window.requestAnimationFrame(loop);
+      //window.reqAnimationFrame(loop);
+      
+      ctx.globalAlpha = 0.1;
+      //ctx.fillStyle = ctx.fillStyle;  
+      ctx.fillStyle = 'white';  
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-
-
-      //if(y <= canvas.height) {
-        this.reqAnimFrame(loop);
-        ctx.globalAlpha = 0.1;
-        ctx.fillStyle = ctx.fillStyle;  
-        //console.log('ContextFillStyle', ctx.fillStyle);
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.globalAlpha = 1;
-        //ctx.lineWidth = lineWidth;
-
-        y += speed;
+      ctx.globalAlpha = 1;
+      self.drawCircle(ctx, x, y, radius, 'gold');
+      y += speed;
 
 
-        //ctx.globalAlpha = 0.1;
-      this.drawCircle(ctx, x, y, radius);
-      //};
-
-
-    }
-
-  loop();
-
+    })();
+    //loop();
+    //console.log(y);
   }
 
   
