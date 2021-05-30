@@ -9,10 +9,10 @@ const logo = new mgLogo('js__motiongraphic-logo',
   }
 );
 
-//logo.strokeGrid('gold', 2);
+//logo.strokeGrid('#CCC', 2);
 
 
 //////////////
 
-logo.motionLine('red', 2);
+logo.motionLine();
 

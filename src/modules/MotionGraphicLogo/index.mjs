@@ -21,7 +21,6 @@ class MotionLogo {
 
     const canvas = this._canvas;
     const ctx = this._ctx;
-
     //const viewBox = {}
     
     canvas.style.width = conf.canvasWidth || '100%';
@@ -87,80 +86,142 @@ class MotionLogo {
   }
 
   strokeGrid(strokeStyle, lineWidth) {
-    const canvas = this._canvas;
-    const ctx = this._ctx;
+    const canvas = this._canvas, ctx = this._ctx;
     const position = {
       cx: this.getPosition().center('x'), // xCenter
       cy: this.getPosition().center('y'), // yCenter
       offset: this.getPosition().verticalInterval(),
       offsetInclinedY: this.getPosition().inclined()
-
     }
 
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth = lineWidth;
 
+    const drawStroke = (() => {
+      ctx.beginPath();
+      // Vertical(L) Line
+      ctx.moveTo(position.cx - position.offset, canvas.height);  
+      ctx.lineTo(position.cx - position.offset, 0);
+      // Vertical(R) Line
+      ctx.moveTo(position.cx + position.offset, canvas.height);  
+      ctx.lineTo(position.cx + position.offset, 0);
+      // horizon Line
+      ctx.moveTo(0, position.cy);  
+      ctx.lineTo(canvas.width, position.cy);
+      // Inclined Line 
+      ctx.moveTo(position.cx - position.offsetInclinedY, 0); 
+      ctx.lineTo(position.cx + position.offsetInclinedY, canvas.height)
+      ctx.stroke();
+    })();
+  }
 
-    //console.log(position);
-    ctx.beginPath();
-    // Vertical(L) Line
-    ctx.moveTo(position.cx - position.offset, canvas.height);  
-    ctx.lineTo(position.cx - position.offset, 0);
-    // Vertical(R) Line
-    ctx.moveTo(position.cx + position.offset, canvas.height);  
-    ctx.lineTo(position.cx + position.offset, 0);
-    // horizon Line
-    ctx.moveTo(0, position.cy);  
-    ctx.lineTo(canvas.width, position.cy);
-    // Inclined Line 
-    ctx.moveTo(position.cx - position.offsetInclinedY, 0); 
-    ctx.lineTo(position.cx + position.offsetInclinedY, canvas.height)
-    //
-    ctx.stroke();
+  getStrokePosition() {
+    const canvas = this._canvas, ctx = this._ctx;
+    const position = {
+      cx: this.getPosition().center('x'), // Center X
+      cy: this.getPosition().center('y'), // Center Y
+      offset: this.getPosition().verticalInterval(),
+      offsetInclinedY: this.getPosition().inclined()
+    }
+    const line = position => {
+      return {
+        verticalLineL: { // Vertical Line Left
+          from: [position.cx - position.offset, 0],
+          to  : [position.cx - position.offset, canvas.height]
+        },
+        verticalLineR: { // Vertical Line Right 
+          from: [position.cx + position.offset, 0],
+          to  : [position.cx + position.offset, canvas.height]
+        },
+        horizonLine: { // Horizon Linne
+          from: [0, position.cy ],
+          to  : [canvas.width, position.cy]
+        },
+        InclinedLine: { // Inclined Line 
+          from: [position.cx - position.offsetInclinedY, 0], 
+          to  : [position.cx + position.offsetInclinedY, canvas.height]
+        }
+      }
+    }
 
+    return line(position);
   }
 
   drawCircle(ctx, x, y, r, c) {
+    ((x, y, r, c) => {
+      console.log('drawCircle this is', self);
+    
+    //const ctx = this._ctx;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2, true);
     ctx.closePath();
     ctx.fillStyle = c;
     ctx.fill();
-    
+  })(x, y, r, c); 
   }
 
-  motionLine(fillStyle, lineWidth) {
-    const canvas = this._canvas, ctx = this._ctx;
-    const self = this;
+  _motionLine(fillStyle, lineWidth) {
+    const  self = this, canvas = this._canvas, ctx = this._ctx;
     const position = {
       cx: this.getPosition().center('x'),
       cy: this.getPosition().center('y'),
       offset: this.getPosition().verticalInterval(),
       offsetInclinedY: this.getPosition().inclined()
     }
-    let x = (position.cx - position.offset), y = 0; 
-    const radius = 4, speed = 8; 
+    let x = (position.cx - position.offset), y = 0, radius = 4, speed = 12, alpha = [0.2, 1]; 
+    let reqAnimationId; 
 
     (function loop() {
+      reqAnimationId = window.requestAnimationFrame(loop);
 
-      window.requestAnimationFrame(loop);
-      //window.reqAnimationFrame(loop);
-      
-      ctx.globalAlpha = 0.1;
-      //ctx.fillStyle = ctx.fillStyle;  
+      ctx.globalAlpha = alpha[0]; 
       ctx.fillStyle = 'white';  
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.globalAlpha = 1;
-      self.drawCircle(ctx, x, y, radius, 'gold');
+      ctx.globalAlpha = alpha[1];
+      self.drawCircle(x, y, radius, 'gold');
       y += speed;
 
-
+      if(y >= canvas.height) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.cancelAnimationFrame(reqAnimationId);
+      }
     })();
-    //loop();
-    //console.log(y);
+    
   }
 
+  motionLine(fillStyle, lineWidth) {
+
+    const self = this, canvas = this._canvas, ctx = this._ctx;
+    const position = this.getStrokePosition();
+    const drawCircle = this.drawCircle;
+    let x = 0, y = 0, radius = 4, speed = 12, alpha = [0.2, 1]; 
+    let reqAnimationId; 
+
+    function loop(cb, x, y) {
+      reqAnimationId = window.requestAnimationFrame(loop);
+
+      ctx.globalAlpha = alpha[0]; 
+      ctx.fillStyle = 'white';  
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = alpha[1];
+      cb.call(self, ctx, x, y, radius, 'gold');
+
+      //console.log(cb); 
+      //
+      if(y > canvas.height) {
+        console.log('y is over');
+        //ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.cancelAnimationFrame(reqAnimationId);
+      }
+
+      y += speed;
+
+      console.log('x is : ' + x);
+      console.log('y is : ' + y);
+    }
+
+    loop(drawCircle, position.verticalLineL.from[0], position.verticalLineL.from[1]);
+  }
   
 }
 
