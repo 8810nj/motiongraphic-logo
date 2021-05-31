@@ -147,17 +147,16 @@ class MotionLogo {
     return line(position);
   }
 
-  drawCircle(ctx, x, y, r, c) {
-    ((x, y, r, c) => {
-      console.log('drawCircle this is', self);
-    
+  drawCircle(context, positionX, positionY, radius, color) {
+    //console.log('CB drawCircle context', context);
     //const ctx = this._ctx;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.fillStyle = c;
-    ctx.fill();
-  })(x, y, r, c); 
+    ((ctx, x, y, r, c) => {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fillStyle = c;
+      ctx.fill();
+    })(context, positionX, positionY, radius, color); 
   }
 
   _motionLine(fillStyle, lineWidth) {
@@ -197,31 +196,46 @@ class MotionLogo {
     let x = 0, y = 0, radius = 4, speed = 12, alpha = [0.2, 1]; 
     let reqAnimationId; 
 
-    function loop(cb, x, y) {
-      reqAnimationId = window.requestAnimationFrame(loop);
+    let myPx, myPy;
 
-      ctx.globalAlpha = alpha[0]; 
-      ctx.fillStyle = 'white';  
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.globalAlpha = alpha[1];
-      cb.call(self, ctx, x, y, radius, 'gold');
+    function test(testCb, testX, testY) {
+      const myCb = testCb;
+      myPx = testX;
+      myPy = testY;
 
-      //console.log(cb); 
-      //
-      if(y > canvas.height) {
-        console.log('y is over');
-        //ctx.clearRect(0, 0, canvas.width, canvas.height);
-        window.cancelAnimationFrame(reqAnimationId);
-      }
+      (function loop(cb, px, py) {
+        reqAnimationId = window.requestAnimationFrame(loop);
+        
+          console.log('first myPy', myPy);
 
-      y += speed;
+          ctx.globalAlpha = alpha[0]; 
+          ctx.fillStyle = 'white';  
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = alpha[1];
 
-      console.log('x is : ' + x);
-      console.log('y is : ' + y);
-    }
+          drawCircle(ctx, px, py, radius, 'blue');
+          //ctpx.clearRect(0, 0, canvas.width, canvas.height);
+          //window.cancelAnimationFrame(reqAnimationId);
 
-    loop(drawCircle, position.verticalLineL.from[0], position.verticalLineL.from[1]);
-  }
+       // myPy =+ speed;
+        myPy =+ speed;
+        console.log('last myPy', myPy);
+
+        if(myPy > 100) {
+          window.cancelAnimationFrame(reqAnimationId);
+        }
+      })(myCb, myPx, myPy);
+
+    // TEST 
+    // It's OK -> console.log('drawCircle is', drawCircle);
+    // It's OK -> drawCircle(ctx, position.verticalLineL.from[0], 0, radius,'red');
+
+    } // END - test
+
+    test(drawCircle, position.verticalLineL.from[0], position.verticalLineL.from[1]);
+
+
+  } // END - motionLine
   
 }
 
