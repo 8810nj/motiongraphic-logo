@@ -147,95 +147,63 @@ class MotionLogo {
     return line(position);
   }
 
-  drawCircle(context, positionX, positionY, radius, color) {
-    //console.log('CB drawCircle context', context);
-    //const ctx = this._ctx;
-    ((ctx, x, y, r, c) => {
+  drawCircle(ctx, x, y, r, c) {
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.fillStyle = c;
       ctx.fill();
-    })(context, positionX, positionY, radius, color); 
   }
 
-  _motionLine(fillStyle, lineWidth) {
-    const  self = this, canvas = this._canvas, ctx = this._ctx;
-    const position = {
-      cx: this.getPosition().center('x'),
-      cy: this.getPosition().center('y'),
-      offset: this.getPosition().verticalInterval(),
-      offsetInclinedY: this.getPosition().inclined()
-    }
-    let x = (position.cx - position.offset), y = 0, radius = 4, speed = 12, alpha = [0.2, 1]; 
-    let reqAnimationId; 
+  motionLine() {
+    const self = this, canvas = this._canvas, ctx = this._ctx;
+    const position = this.getStrokePosition();
+    ///const drawCircle = this.drawCircle;
+    let x = 0, y = 0, radius = 4, speed = 4, alpha = [0.1, 1]; 
 
-    (function loop() {
-      reqAnimationId = window.requestAnimationFrame(loop);
+    function loop(timestamp, cb, px, py) {
+      if( y > canvas.width) return;
+      //ctx = self._ctx;
+      x = px;
+      y = py;
+
+
+      // console.log('check self', self); // Check is OK!
+      // console.log('check ctx ->', ctx); // Check is OK!
+
+
+      window.requestAnimationFrame(loop.call(self, drawCircle, x, y));
+
+
 
       ctx.globalAlpha = alpha[0]; 
       ctx.fillStyle = 'white';  
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      //if(y) console.log('in 100');
       ctx.globalAlpha = alpha[1];
-      self.drawCircle(x, y, radius, 'gold');
+      cb(ctx, x, y, radius, 'blue');
       y += speed;
+      console.log('Y is ', y);
 
-      if(y >= canvas.height) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        window.cancelAnimationFrame(reqAnimationId);
-      }
-    })();
-    
-  }
+    }
 
-  motionLine(fillStyle, lineWidth) {
+    window.requestAnimaitonFrame(loop.call(self, this.drawCircle, position.verticalLineL.from[0], position.verticalLineL.from[1]));
 
-    const self = this, canvas = this._canvas, ctx = this._ctx;
-    const position = this.getStrokePosition();
-    const drawCircle = this.drawCircle;
-    let x = 0, y = 0, radius = 4, speed = 12, alpha = [0.2, 1]; 
-    let reqAnimationId; 
-
-    let myPx, myPy;
-
-    function test(testCb, testX, testY) {
-      const myCb = testCb;
-      myPx = testX;
-      myPy = testY;
-
-      (function loop(cb, px, py) {
-        reqAnimationId = window.requestAnimationFrame(loop);
-        
-          console.log('first myPy', myPy);
-
-          ctx.globalAlpha = alpha[0]; 
-          ctx.fillStyle = 'white';  
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.globalAlpha = alpha[1];
-
-          drawCircle(ctx, px, py, radius, 'blue');
-          //ctpx.clearRect(0, 0, canvas.width, canvas.height);
-          //window.cancelAnimationFrame(reqAnimationId);
-
-       // myPy =+ speed;
-        myPy =+ speed;
-        console.log('last myPy', myPy);
-
-        if(myPy > 100) {
-          window.cancelAnimationFrame(reqAnimationId);
-        }
-      })(myCb, myPx, myPy);
-
-    // TEST 
-    // It's OK -> console.log('drawCircle is', drawCircle);
-    // It's OK -> drawCircle(ctx, position.verticalLineL.from[0], 0, radius,'red');
-
-    } // END - test
-
-    test(drawCircle, position.verticalLineL.from[0], position.verticalLineL.from[1]);
-
-
+    //window.requestAnimationFrame(loop);
   } // END - motionLine
+
+
+/**************************************************/
+  // Dev Function !!!!!
+  touchLoopStop() {
+    document.addEventListener('click', (e) => {
+      alert('Click Check is OK!!');
+     // window.cancelAnimationFrame(this.reqAnimationId);
+    });
+
+    //console.log('touchLoopStop in reqAnimationId', this.reqAnimationId);
+  }
   
 }
 
