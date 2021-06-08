@@ -158,21 +158,22 @@ class MotionLogo {
   motionLine() {
     const self = this, canvas = this._canvas, ctx = this._ctx;
     const position = this.getStrokePosition();
-    ///const drawCircle = this.drawCircle;
-    let x = 0, y = 0, radius = 4, speed = 4, alpha = [0.1, 1]; 
+    const circle = this.drawCircle;
+    let x = 0, y = 0, radius = 4, speed = 2, alpha = [0.1, 1]; 
 
-    function loop(timestamp, cb, px, py) {
-      if( y > canvas.width) return;
+    function loop(timestamp, px, py) {
+      if( y > canvas.height) return;
       //ctx = self._ctx;
+
+
+
+      console.log('px :', px);
+      console.log('py :', py);
       x = px;
-      y = py;
+      y += py;
 
 
-      // console.log('check self', self); // Check is OK!
-      // console.log('check ctx ->', ctx); // Check is OK!
-
-
-      window.requestAnimationFrame(loop.call(self, drawCircle, x, y));
+      window.requestAnimationFrame(loop.bind(self, 0, x, speed));
 
 
 
@@ -182,29 +183,38 @@ class MotionLogo {
 
       //if(y) console.log('in 100');
       ctx.globalAlpha = alpha[1];
-      cb(ctx, x, y, radius, 'blue');
+      circle(ctx, x, y, radius, 'blue');
       y += speed;
       console.log('Y is ', y);
 
-    }
+    } //END - function loop
 
-    window.requestAnimaitonFrame(loop.call(self, this.drawCircle, position.verticalLineL.from[0], position.verticalLineL.from[1]));
+    window.requestAnimationFrame(loop.bind(null, 0, position.verticalLineL.from[0], position.verticalLineL.from[1]));
+    // loop(0, position.verticalLineL.from[0], position.verticalLineL.from[1]); // >> これでも動く 20/06/09
 
     //window.requestAnimationFrame(loop);
   } // END - motionLine
 
+  //anima() {
 
-/**************************************************/
-  // Dev Function !!!!!
-  touchLoopStop() {
-    document.addEventListener('click', (e) => {
-      alert('Click Check is OK!!');
-     // window.cancelAnimationFrame(this.reqAnimationId);
-    });
+  //  //
+  //  var Animator = function() {
+  //    this.state = 0;
+  //    this.boundOnAnimationFrame = this.onAnimationFrame.bind(this);
+  //    requestAnimationFrame(this.boundOnAnimationFrame);
+  //  };
 
-    //console.log('touchLoopStop in reqAnimationId', this.reqAnimationId);
-  }
+  //  Animator.prototype.onAnimationFrame = function() {
+  //    if (条件分岐) {
+  //       this.state = 2;
+  //    } else if (条件分岐) {
+  //       this.state = 1;
+  //    }
+  //    requestAnimationFrame(this.boundOnAnimationFrame);
+  //  };
+  //} // End Method - Anima
+
   
-}
+} //END - Module
 
 export default MotionLogo;

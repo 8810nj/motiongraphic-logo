@@ -15,6 +15,5 @@ const logo = new mgLogo('js__motiongraphic-logo',
 //////////////
 
 logo.motionLine();
-logo.touchLoopStop();
 
 
