@@ -46,7 +46,6 @@ class MotionLogo {
   }
 
   getPosition() {
-    // Consider Method Chain !!?
     const canvas = this._canvas;
     return {
       center(axis) {
@@ -73,14 +72,7 @@ class MotionLogo {
         ** tanθ にangle=60 固定で三平方の定理から√3 で三角比の計算を簡易化
         ** ToDo: angle 引数を取得し反映できるようにする。
         **/
-
-        const tempVar = Math.sqrt(3);
-
-        const inclinedY = () => {
-            return Math.round((canvas.height / 2) * tempVar);
-        }
-        return inclinedY();
-
+        return Math.round((canvas.height / 2) * Math.sqrt(3));
       }
     }; // End Return;
   }
@@ -143,78 +135,86 @@ class MotionLogo {
         }
       }
     }
-
     return line(position);
   }
 
-  drawCircle(ctx, x, y, r, c) {
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2, true);
-      ctx.closePath();
-      ctx.fillStyle = c;
-      ctx.fill();
+  drawCircle(ctx, positionX, positionY, radius, color) {
+    ctx.beginPath();
+    ctx.arc(positionX, positionY, radius, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
   }
 
+  /*
+  ** startX, startY, 
+  **/
   motionLine() {
     const self = this, canvas = this._canvas, ctx = this._ctx;
     const position = this.getStrokePosition();
     const circle = this.drawCircle;
-    let x = 0, y = 0, radius = 4, speed = 2, alpha = [0.1, 1]; 
+    let x = 0, y = 0, radius = 4, speed = 4, alpha = [0.1, 1]; 
 
     function loop(timestamp, px, py) {
-      if( y > canvas.height) return;
-      //ctx = self._ctx;
-
-
-
-      console.log('px :', px);
-      console.log('py :', py);
+      if(x > canvas.width || y > canvas.height) return;
       x = px;
       y += py;
 
-
-      window.requestAnimationFrame(loop.bind(self, 0, x, speed));
-
-
+      window.requestAnimationFrame(loop.bind(null, 0, x, speed));
 
       ctx.globalAlpha = alpha[0]; 
       ctx.fillStyle = 'white';  
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      //if(y) console.log('in 100');
       ctx.globalAlpha = alpha[1];
       circle(ctx, x, y, radius, 'blue');
       y += speed;
       console.log('Y is ', y);
-
     } //END - function loop
-
     window.requestAnimationFrame(loop.bind(null, 0, position.verticalLineL.from[0], position.verticalLineL.from[1]));
-    // loop(0, position.verticalLineL.from[0], position.verticalLineL.from[1]); // >> これでも動く 20/06/09
-
-    //window.requestAnimationFrame(loop);
   } // END - motionLine
-
-  //anima() {
-
-  //  //
-  //  var Animator = function() {
-  //    this.state = 0;
-  //    this.boundOnAnimationFrame = this.onAnimationFrame.bind(this);
-  //    requestAnimationFrame(this.boundOnAnimationFrame);
-  //  };
-
-  //  Animator.prototype.onAnimationFrame = function() {
-  //    if (条件分岐) {
-  //       this.state = 2;
-  //    } else if (条件分岐) {
-  //       this.state = 1;
-  //    }
-  //    requestAnimationFrame(this.boundOnAnimationFrame);
-  //  };
-  //} // End Method - Anima
-
   
+
+  /*
+  *
+  */
+  motionLineTest(point) {
+    const self = this, canvas = this._canvas, ctx = this._ctx;
+    const position = this.getStrokePosition();
+    const drawMark = this.drawCircle;
+    let x = 0, y = 0, radius = 4, speed = 4, alpha = [0.1, 1]; 
+
+    //if(!point) {
+    //  start: {
+    //    x: 0,
+    //    y: 0
+    //  },
+    //  arrival: {
+    //    x: canvas.width,
+    //    y: canvas.height
+    //  }
+    //};
+
+    function loop(timestamp, px, py) {
+      if(x > canvas.width || y > canvas.height) return;
+      x = px;
+      y += py;
+
+      window.requestAnimationFrame(loop.bind(null, 0, x, speed));
+
+      ctx.globalAlpha = alpha[0]; 
+      ctx.fillStyle = 'white';  
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.globalAlpha = alpha[1];
+      drawMark(ctx, x, y, radius, 'blue');
+      y += speed;
+      console.log('Y is ', y);
+    } //END - function loop
+    window.requestAnimationFrame(loop.bind(null, 0, position.verticalLineL.from[0], position.verticalLineL.from[1]));
+  } // END - motionLineTest
+
+
 } //END - Module
 
 export default MotionLogo;
