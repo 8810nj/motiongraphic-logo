@@ -45,39 +45,6 @@ class MotionLogo {
     })();
   }
 
-  //getPosition() {
-  //  const canvas = this._canvas;
-  //  return {
-  //    center(axis) {
-  //      let result;
-  //      switch(axis) {
-  //        case 'x':
-  //          result = Math.round(canvas.width / 2);
-  //          break;
-  //        case 'y': 
-  //          result = Math.round(canvas.height / 2);
-  //          break;
-  //      }
-  //      return result;
-  //    },
-  //    verticalInterval(rate = 0.25) {
-  //      if(canvas.width / canvas.height >= 1) {
-  //        return canvas.height * rate;
-  //      } else {
-  //        return canvas.width * rate; 
-  //      }
-  //    },
-  //    inclined(angle = 60) {
-  //      /* プロトタイプ 
-  //      ** tanθ にangle=60 固定で三平方の定理から√3 で三角比の計算を簡易化
-  //      ** ToDo: angle 引数を取得し反映できるようにする。
-  //      **/
-  //      return Math.round((canvas.height / 2) * Math.sqrt(3));
-  //    }
-  //  }; // End Return;
-  //}
-
-
 
   //strokeGrid(strokeStyle, lineWidth) {
   //  const canvas = this._canvas, ctx = this._ctx;
@@ -109,50 +76,20 @@ class MotionLogo {
   //  })();
   //}
 
-  //getStrokePosition() {
-  //  const canvas = this._canvas, ctx = this._ctx;
-  //  const position = {
-  //    cx: this.getPosition().center('x'), // Center X
-  //    cy: this.getPosition().center('y'), // Center Y
-  //    offset: this.getPosition().verticalInterval(),
-  //    offsetInclinedY: this.getPosition().inclined()
-  //  }
-  //  const line = position => {
-  //    return {
-  //      verticalLineL: { // Vertical Line Left
-  //        from: [position.cx - position.offset, 0],
-  //        to  : [position.cx - position.offset, canvas.height]
-  //      },
-  //      verticalLineR: { // Vertical Line Right 
-  //        from: [position.cx + position.offset, 0],
-  //        to  : [position.cx + position.offset, canvas.height]
-  //      },
-  //      horizonLine: { // Horizon Linne
-  //        from: [0, position.cy ],
-  //        to  : [canvas.width, position.cy]
-  //      },
-  //      InclinedLine: { // Inclined Line 
-  //        from: [position.cx - position.offsetInclinedY, 0], 
-  //        to  : [position.cx + position.offsetInclinedY, canvas.height]
-  //      }
-  //    }
-  //  }
-  //  return line(position);
-  //}
 
   getPositions() {
     const canvas = this._canvas, ctx = this._ctx,
           centerX = Math.round(canvas.width / 2),
           centerY = Math.round(canvas.height / 2),
           diagonalX = Math.round((canvas.height / 2) * Math.sqrt(3)), //angle of 60
-          offsetX = () => {
+          offsetX = (() => {
             const rate = 0.25;
             if(canvas.width / canvas.height >= 1) {
               return canvas.height * rate;
             } else {
               return canvas.width * rate; 
             }
-          };
+          })();
 
     return {
       verticalL: {
@@ -182,61 +119,51 @@ class MotionLogo {
     ctx.fill();
   }
 
-  /*
-  ** startX, startY, 
-  **/
-  motionLine() {
-    const self = this, canvas = this._canvas, ctx = this._ctx;
-    const position = this.getPositions();
-    const circle = this.drawCircle;
-    let x = 0, y = 0, radius = 4, speed = 4, alpha = [0.1, 1]; 
-
-    function loop(timestamp, px, py) {
-      if(x > canvas.width || y > canvas.height) return;
-      x = px;
-      y += py;
-
-      window.requestAnimationFrame(loop.bind(null, 0, x, speed));
-
-      ctx.globalAlpha = alpha[0]; 
-      ctx.fillStyle = 'white';  
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.globalAlpha = alpha[1];
-      circle(ctx, x, y, radius, 'blue');
-      y += speed;
-      console.log('Y is ', y);
-    } //END - function loop
-    window.requestAnimationFrame(loop.bind(null, 0, position.verticalLineL.from[0], position.verticalLineL.from[1]));
-  } // END - motionLine
-
-  /*
-  *
-  */
-  animateMark(point) {
+  animateMark() {
     const self = this, canvas = this._canvas, ctx = this._ctx,
           position = this.getPositions(),
           mark = this.drawCircle;
-    let x = 0, y = 0, radius = 4, speed = 4, alpha = [0.1, 1]; 
+    let x = 0, y = 0, radius = 4, speed = 8, alpha = 0.6; 
+    const fps = 30.0, frameLength = 6.0;
 
-    function loop(timestamp, px, py) {
-      if(x > canvas.width || y > canvas.height) return;
-      x = px;
-      y += py;
+    let reqAnimationId;
+    let startTime;
+    
+    //console.log('performanceNow', time);
 
-      window.requestAnimationFrame(loop.bind(null, 0, x, speed));
+    function loop(timestamp) {
+      if(x > canvas.width || y > canvas.height) {
+        cancelAnimationFrame(reqAnimationId);
+        return;
+      }
 
-      ctx.globalAlpha = alpha[0]; 
+      ctx.globalAlpha = alpha; 
       ctx.fillStyle = 'white';  
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      reqAnimationId = window.requestAnimationFrame(loop);
+      console.log('times', [startTime, timestamp]);
+      //
+      let frame = Math.floor( ( timestamp - startTime ) / ( 1000.0 / fps ) % frameLength );
+      // 1fps 当たりの経過時間ミリ秒
+      let frame2 = Math.floor( ( timestamp - startTime ) / ( 1000.0 / fps ));
+      console.log('frame', frame);
+      console.log('frame2', frame2);
 
-      ctx.globalAlpha = alpha[1];
+      ctx.globalAlpha = 1;
       mark(ctx, x, y, radius, 'gold');
-      console.log(mark);
       y += speed;
+      //y += (position.verticalL.to[1] - y) / 30;
       console.log('Y is ', y);
     } //END - function loop
-    window.requestAnimationFrame(loop.bind(null, 0, position.verticalL.from[0], position.verticalL.from[1]));
+
+    //window.requestAnimationFrame(loop.bind(null, position.verticalL));
+    window.requestAnimationFrame(function() {
+      x = position.verticalL.from[0];
+      y = position.verticalL.from[1];
+      startTime = performance.now();
+      loop();
+    });
   } // END - motionLineTest
 
 
