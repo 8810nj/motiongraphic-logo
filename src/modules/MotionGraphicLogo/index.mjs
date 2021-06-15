@@ -121,18 +121,13 @@ class MotionLogo {
 
   animateMark() {
     const self = this, canvas = this._canvas, ctx = this._ctx,
-          position = this.getPositions(),
-          mark = this.drawCircle;
-    let x = 0, y = 0, radius = 4, speed = 8, alpha = 0.6; 
-    const fps = 30.0, frameLength = 6.0;
-
-    let reqAnimationId;
-    let startTime;
-    
-    //console.log('performanceNow', time);
+          position = this.getPositions(), mark = this.drawCircle,
+          fps = 30.0, frameLength = 1.0, radius = 4, alpha = 0.4;
+    let reqAnimationId, startTime, x = 0, y = 0; 
 
     function loop(timestamp) {
       if(x > canvas.width || y > canvas.height) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         cancelAnimationFrame(reqAnimationId);
         return;
       }
@@ -140,29 +135,25 @@ class MotionLogo {
       ctx.globalAlpha = alpha; 
       ctx.fillStyle = 'white';  
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
+
       reqAnimationId = window.requestAnimationFrame(loop);
-      console.log('times', [startTime, timestamp]);
-      //
-      let frame = Math.floor( ( timestamp - startTime ) / ( 1000.0 / fps ) % frameLength );
-      // 1fps 当たりの経過時間ミリ秒
-      let frame2 = Math.floor( ( timestamp - startTime ) / ( 1000.0 / fps ));
-      console.log('frame', frame);
-      console.log('frame2', frame2);
+
+      //let frame = Math.floor((timestamp - startTime) / (1000.0 / fps) % frameLength);
+      let frame = Math.floor((timestamp - startTime) / (1000.0 / fps));
 
       ctx.globalAlpha = 1;
       mark(ctx, x, y, radius, 'gold');
-      y += speed;
-      //y += (position.verticalL.to[1] - y) / 30;
-      console.log('Y is ', y);
+
+      //y += (frameLength + frame);
+      y += (frameLength * frame);
+
     } //END - function loop
 
-    //window.requestAnimationFrame(loop.bind(null, position.verticalL));
-    window.requestAnimationFrame(function() {
+    window.requestAnimationFrame(function(timestamp) {
       x = position.verticalL.from[0];
       y = position.verticalL.from[1];
       startTime = performance.now();
-      loop();
+      new loop(timestamp);
     });
   } // END - motionLineTest
 
