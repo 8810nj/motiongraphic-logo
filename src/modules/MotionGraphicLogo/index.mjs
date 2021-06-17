@@ -122,8 +122,10 @@ class MotionLogo {
   animateMark() {
     const self = this, canvas = this._canvas, ctx = this._ctx,
           position = this.getPositions(), mark = this.drawCircle,
-          fps = 30.0, frameLength = 1.0, radius = 4, alpha = 0.4;
-    let reqAnimationId, startTime, x = 0, y = 0; 
+          fps = 30.0, frameLength = 8.0, radius = 4, alpha = 0.6;
+    let markPosition = {};
+
+    let reqAnimationId, startTime, x = 0, y = 0;
 
     function loop(timestamp) {
       if(x > canvas.width || y > canvas.height) {
@@ -136,24 +138,40 @@ class MotionLogo {
       ctx.fillStyle = 'white';  
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      reqAnimationId = window.requestAnimationFrame(loop);
 
-      //let frame = Math.floor((timestamp - startTime) / (1000.0 / fps) % frameLength);
-      let frame = Math.floor((timestamp - startTime) / (1000.0 / fps));
+      let frame = Math.floor((timestamp - startTime) / (1000.0 / fps) % frameLength);
+
+      //let frame = Math.floor((timestamp - startTime) / (1000.0 / fps));
+      console.log('frame', frame);
 
       ctx.globalAlpha = 1;
       mark(ctx, x, y, radius, 'gold');
 
-      //y += (frameLength + frame);
-      y += (frameLength * frame);
+      console.log('beforeY', y);
+      y += (frameLength - frame);
+      //y += frame;
+      console.log('afterY', y);
+      console.log('----');
 
-    } //END - function loop
+
+      reqAnimationId = window.requestAnimationFrame(loop);
+
+    } // loop end.
 
     window.requestAnimationFrame(function(timestamp) {
-      x = position.verticalL.from[0];
-      y = position.verticalL.from[1];
+      markPosition = {
+        from: [position.verticalL.from[0], position.verticalL.from[1]],
+        to: [position.verticalL.to[0], position.verticalL.to[1]]
+      }
+
+      //x = position.verticalL.from[0];
+      //y = position.verticalL.from[1];
+
+      x = markPosition.from[0]; 
+      y = markPosition.from[1]; 
+
       startTime = performance.now();
-      new loop(timestamp);
+      loop(timestamp);
     });
   } // END - motionLineTest
 
