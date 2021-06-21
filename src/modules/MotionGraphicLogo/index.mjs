@@ -93,7 +93,8 @@ class MotionLogo {
 
     return {
       verticalL: {
-        from: [centerX - offsetX, 0],
+        //from: [centerX - offsetX, 0],
+        from: [centerX - offsetX, 1],
         to  : [centerX - offsetX, canvas.height]
       },
       verticalR: {
@@ -122,7 +123,7 @@ class MotionLogo {
   animateMark() {
     const self = this, canvas = this._canvas, ctx = this._ctx,
           position = this.getPositions(), mark = this.drawCircle,
-          fps = 30.0, frameLength = 8.0, radius = 4, alpha = 0.6;
+          fps = 60.0, frameLength = 8.0, radius = 4, alpha = 0.6;
     let markPosition = {};
 
     let reqAnimationId, startTime, x = 0, y = 0;
@@ -139,16 +140,23 @@ class MotionLogo {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 
-      let frame = Math.floor((timestamp - startTime) / (1000.0 / fps) % frameLength);
+      //let frame = Math.floor((timestamp - startTime) / (1000.0 / fps) % y);
 
-      //let frame = Math.floor((timestamp - startTime) / (1000.0 / fps));
+      // 1fpsミリ秒当たりの経過秒数
+      let frame = Math.floor((timestamp - startTime) / (1000.0 / fps));
+
+      console.log('times', {timestamp, startTime});
       console.log('frame', frame);
 
       ctx.globalAlpha = 1;
       mark(ctx, x, y, radius, 'gold');
 
       console.log('beforeY', y);
-      y += (frameLength - frame);
+      let checkVal = frame / y;
+
+      console.log('checkVal', checkVal);
+
+      y += Math.floor(checkVal);
       //y += frame;
       console.log('afterY', y);
       console.log('----');
@@ -158,7 +166,13 @@ class MotionLogo {
 
     } // loop end.
 
+
     window.requestAnimationFrame(function(timestamp) {
+      
+      //startTime に直接入れ込むとtimesStamp取得時より後になってしまう...。
+      //startTime = performance.now();
+      startTime = timestamp;
+
       markPosition = {
         from: [position.verticalL.from[0], position.verticalL.from[1]],
         to: [position.verticalL.to[0], position.verticalL.to[1]]
@@ -170,10 +184,9 @@ class MotionLogo {
       x = markPosition.from[0]; 
       y = markPosition.from[1]; 
 
-      startTime = performance.now();
       loop(timestamp);
     });
-  } // END - motionLineTest
+  } // END - animateMark 
 
 
 } //END - Module
